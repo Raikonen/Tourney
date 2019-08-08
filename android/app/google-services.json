@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "969376126324",
+    "firebase_url": "https://tourney-837e9.firebaseio.com",
+    "project_id": "tourney-837e9",
+    "storage_bucket": "tourney-837e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969376126324:android:8762d8d3ee74bfa7",
+        "android_client_info": {
+          "package_name": "com.example.tourney"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "969376126324-dubp3p002ncromqfqtfmnfdjb2vimgnq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDkWuUIWVOm3yNowXuhSCIu5IBo_FggDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969376126324-dubp3p002ncromqfqtfmnfdjb2vimgnq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
