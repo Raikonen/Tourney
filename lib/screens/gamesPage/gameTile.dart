@@ -29,12 +29,13 @@ class _GameTileState extends State<GameTile> {
             children: <Widget>[
               InkWell(
                   onTap: _handleTap,
-                  child: GameTileTopHalf(widget._game, widget._index, false)),
+                  child: GameTileTopHalf(
+                      widget._game, widget._index, false, true)),
               GameTileBottomHalf(widget._game),
             ],
           )
         : InkWell(
             onTap: _handleTap,
-            child: GameTileTopHalf(widget._game, widget._index, false));
+            child: GameTileTopHalf(widget._game, widget._index, false, false));
   }
 }

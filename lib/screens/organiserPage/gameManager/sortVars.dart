@@ -1,0 +1,4 @@
+enum SortVars {
+  alphabetical,
+  recent
+}

@@ -70,10 +70,11 @@ class Tournament {
         _tourName = data['tourname'],
         _orgCode = data['orgcode'],
         _status = data['status'],
-        _teams = data['teams'],
-        _games = data['games'],
-        _teamNames = data['teamnames'];
+        _teams = Map<String, dynamic>.from(data['teams']),
+        _games = Map<String, dynamic>.from(data['games']),
+        _teamNames = List<String>.from(data['teamnames']);
 
+  @override
   String toString() {
     return _tourName;
   }

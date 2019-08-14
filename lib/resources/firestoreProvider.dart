@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/tournament.dart';
-import '../models/game.dart';
+import 'package:flutter/foundation.dart';
+import 'package:tourney/models/tournament.dart';
+import 'package:tourney/models/game.dart';
+import 'package:tourney/models/team.dart';
 
 class FirestoreProvider {
   Firestore _firestore = Firestore.instance;
@@ -13,16 +15,13 @@ class FirestoreProvider {
     return _firestore.collection("tournaments").snapshots();
   }
 
-  Future<dynamic> checkTournament(String tourID) async {
+  Future<bool> checkTournament(String tourID) async {
     return await _firestore
         .collection("tournaments")
         .document(tourID)
         .get()
         .then((DocumentSnapshot res) {
       return (res.data != null);
-    }).catchError((error) {
-      print('this is the error: ${error}');
-      return null;
     });
   }
 
@@ -41,16 +40,24 @@ class FirestoreProvider {
     Game newGame = Game(team1, team2);
     final DocumentReference postRef =
         _firestore.collection("tournaments").document(tourID);
+    bool isValid = true;
+
     _firestore.runTransaction((Transaction tx) async {
       DocumentSnapshot postSnapshot = await tx.get(postRef);
       if (postSnapshot.exists) {
-        var games =
-            new Map<String, dynamic>.from(await postSnapshot.data['games']);
-        games['ongoing'][newGame.gameID] = (newGame.toJSON());
+        Map<String, dynamic> games =
+            Map<String, dynamic>.from(postSnapshot.data['games']);
+        Map<String, dynamic>.from(games['ongoing'])
+          .forEach((key, val) {
+            if(setEquals<String>(Set<String>.from(val['teamsinvolved']),newGame.teamsInvolved.toSet()))
+              isValid = false;
+          });
+        if(isValid)
+          games['ongoing'][newGame.gameID] = newGame.toJSON();
         await tx.update(postRef, <String, dynamic>{'games': games});
       }
     });
-    return newGame;
+    return isValid ? newGame : null;
   }
 
   Future<void> updatePoints(
@@ -60,23 +67,17 @@ class FirestoreProvider {
     await _firestore.runTransaction((Transaction tx) async {
       DocumentSnapshot postSnapshot = await tx.get(postRef);
       if (postSnapshot.exists) {
-        // Current Game
         Map<String, dynamic> games =
-            Map<String, dynamic>.from(await postSnapshot.data['games']);
-        Map<String, dynamic> currentGame =
-            Map<String, dynamic>.from(games['ongoing'].remove(gameID));
+            Map<String, dynamic>.from(postSnapshot.data['games']);
+
+        Game currentGame = Game.fromJSON(games['ongoing'][gameID]);
+
         if (index == 0) {
-          currentGame['team1pointshistory']
-                  [DateTime.now().millisecondsSinceEpoch.toString()] =
-              points > 0 ? '+$points' : '$points';
-          currentGame['points'][0] += points;
+          currentGame.addTeam1Point(points);
         } else {
-          currentGame['team2pointshistory']
-                  [DateTime.now().millisecondsSinceEpoch.toString()] =
-              points > 0 ? '+$points' : '$points';
-          currentGame['points'][1] += points;
+          currentGame.addTeam2Point(points);
         }
-        games['ongoing'][gameID] = currentGame;
+        games['ongoing'][gameID] = currentGame.toJSON();
         await tx.update(postRef, <String, dynamic>{'games': games});
       }
     });
@@ -88,66 +89,141 @@ class FirestoreProvider {
         _firestore.collection("tournaments").document(tourID);
     await postRef.get().then((DocumentSnapshot res) {
       if (res.exists) {
-        Map<String, dynamic> games =
-            Map<String, dynamic>.from(res.data['games']);
-        Map<String, dynamic> completedGames = Map<String, dynamic>.from(games['completed']);
-        completedGames.forEach((key, val) => key == (team1 + "_" + team2)
-            ? val['winningteam'] == team1
-                ? winloss += "W"
-                : val['winningteam'] == team2 ? winloss += "L" : winloss += "D"
-            : null);
+        Map<String, dynamic>.from(res.data['games']['completed'])
+            .forEach((key, val) {
+          Game game = Game.fromJSON(val);
+          if (game.teamsInvolved[0] == team1 &&
+              game.teamsInvolved[1] == team2) {
+            if (game.winningTeam == team1)
+              winloss += "W";
+            else if (game.winningTeam == team2)
+              winloss += "L";
+            else
+              winloss += "D";
+          }
+        });
       }
     });
     return winloss;
   }
 
-  Future<List<Map<String,dynamic>>> getPointsHistory(String tourID, String gameID) async {
+  Future<Map<String, dynamic>> getCompletedGames(String tourID) async {
     final DocumentReference postRef =
         _firestore.collection("tournaments").document(tourID);
-    List<Map<String,dynamic>> result = [];
-    await postRef.get().then((DocumentSnapshot res) {
+    return await postRef.get().then((DocumentSnapshot res) {
       if (res.exists) {
-        result.add(Map<String,dynamic>.from(res.data['games']['completed'][gameID]['team1pointshistory']));
-        result.add(Map<String,dynamic>.from(res.data['games']['completed'][gameID]['team2pointshistory']));
-    }});
-    return result;
-    
+        return Map<String, dynamic>.from(res.data['games']['completed']);
+      } else
+        return null;
+    });
   }
 
-  Future<void> finishGame(String tourID, String gameID) async {
+  Future<List<Map<String, dynamic>>> getPointsHistory(
+      String tourID, String gameID) async {
+    final DocumentReference postRef =
+        _firestore.collection("tournaments").document(tourID);
+    List<Map<String, dynamic>> result = [];
+    await postRef.get().then((DocumentSnapshot res) {
+      if (res.exists) {
+        result.add(Map<String, dynamic>.from(
+            res.data['games']['completed'][gameID]['team1pointshistory']));
+        result.add(Map<String, dynamic>.from(
+            res.data['games']['completed'][gameID]['team2pointshistory']));
+      }
+    });
+    return result;
+  }
+
+  Future<void> deleteOngoingGame(String tourID, String gameID) async {
     final DocumentReference postRef =
         _firestore.collection("tournaments").document(tourID);
     // Transaction to update game
-    Map<String, dynamic> currentGame;
     await _firestore.runTransaction((Transaction tx) async {
       DocumentSnapshot postSnapshot = await tx.get(postRef);
       if (postSnapshot.exists) {
         // Current Game
         Map<String, dynamic> games =
-            Map<String, dynamic>.from(await postSnapshot.data['games']);
-        currentGame =
-            Map<String, dynamic>.from(games['ongoing'].remove(gameID));
-        currentGame['timeended'] = DateTime.now().millisecondsSinceEpoch;
-
-        // Set Winning Team for Current Game
-        if (currentGame['points'][0] > currentGame['points'][1]) {
-          currentGame['winningteam'] = currentGame['teamsinvolved'][0];
-          currentGame['losingteam'] = currentGame['teamsinvolved'][1];
-        } else if (currentGame['points'][1] > currentGame['points'][0]) {
-          currentGame['winningteam'] = currentGame['teamsinvolved'][1];
-          currentGame['losingteam'] = currentGame['teamsinvolved'][0];
-        } else {
-          currentGame['winningteam'] = 'Draw';
-          currentGame['losingteam'] = 'Draw';
-        }
-
-        // Move game to completed List
-        Map<String,dynamic> currentList = Map<String,dynamic>.from(games['completed']);
-        currentList[currentGame['gameid']] = currentGame;
-        games['completed'] = currentList;
+            Map<String, dynamic>.from(postSnapshot.data['games']);
+        games['ongoing'].remove(gameID);
         await tx.update(postRef, <String, dynamic>{'games': games});
       }
-    }).catchError((err) => print(err));
+    });
+  }
+
+  Future<void> deleteCompletedGame(String tourID, String gameID) async {
+    final DocumentReference postRef =
+        _firestore.collection("tournaments").document(tourID);
+    String winningTeamName;
+    String losingTeamName;
+    List<String> teamsInvolved;
+    // Transaction to update game
+    await _firestore.runTransaction((Transaction tx) async {
+      DocumentSnapshot postSnapshot = await tx.get(postRef);
+      if (postSnapshot.exists) {
+        // Current Game
+        Map<String, dynamic> games =
+            Map<String, dynamic>.from(postSnapshot.data['games']);
+        Game gameToDelete = Game.fromJSON(games['completed'].remove(gameID));
+        winningTeamName = gameToDelete.winningTeam;
+        losingTeamName = gameToDelete.losingTeam;
+        teamsInvolved = List<String>.from(gameToDelete.teamsInvolved);
+        await tx.update(postRef, <String, dynamic>{'games': games});
+      }
+    });
+    await _firestore.runTransaction((Transaction tx) async {
+      DocumentSnapshot postSnapshot = await tx.get(postRef);
+      if (postSnapshot.exists) {
+        // Current Teams Info
+        Map<String, dynamic> teams =
+            Map<String, dynamic>.from(await postSnapshot.data['teams']);
+        // Update Winning Team
+        if (winningTeamName == "Draw") {
+          Team drawingTeam1 =
+              Team.fromJSON(Map<String, dynamic>.from(teams[teamsInvolved[0]]));
+          Team drawingTeam2 =
+              Team.fromJSON(Map<String, dynamic>.from(teams[teamsInvolved[1]]));
+          drawingTeam1.removeDraw(gameID);
+          drawingTeam2.removeDraw(gameID);
+          teams[drawingTeam1.teamName] = drawingTeam1.toJSON();
+          teams[drawingTeam2.teamName] = drawingTeam2.toJSON();
+        } else {
+          Team winningTeam =
+              Team.fromJSON(Map<String, dynamic>.from(teams[winningTeamName]));
+          Team losingTeam =
+              Team.fromJSON(Map<String, dynamic>.from(teams[losingTeamName]));
+          winningTeam.removeWin(gameID);
+          losingTeam.removeLoss(gameID);
+          teams[winningTeamName] = winningTeam.toJSON();
+          teams[losingTeamName] = losingTeam.toJSON();
+        }
+        await tx.update(postRef, <String, dynamic>{'teams': teams});
+      }
+    });
+  }
+
+  Future<void> finishGame(String tourID, String gameID) async {
+    final DocumentReference postRef =
+        _firestore.collection("tournaments").document(tourID);
+    Game currentGame;
+
+    // Transaction to update game
+    await _firestore.runTransaction((Transaction tx) async {
+      DocumentSnapshot postSnapshot = await tx.get(postRef);
+      if (postSnapshot.exists) {
+        // Current Game
+        Map<String, dynamic> games =
+            Map<String, dynamic>.from(postSnapshot.data['games']);
+
+        // Finish Current Game
+        currentGame = Game.fromJSON(games['ongoing'].remove(gameID));
+        currentGame.finishGame();
+
+        // Move game to completed List
+        games['completed'][currentGame.gameID] = currentGame.toJSON();
+
+        await tx.update(postRef, <String, dynamic>{'games': games});
+      }
+    });
 
     // Update Team Statistics
     await _firestore.runTransaction((Transaction tx) async {
@@ -155,62 +231,30 @@ class FirestoreProvider {
       if (postSnapshot.exists) {
         // List of teams
         Map<String, dynamic> teams =
-            Map<String, dynamic>.from(await postSnapshot.data['teams']);
+            Map<String, dynamic>.from(postSnapshot.data['teams']);
         // Draw Case
-        if (currentGame['winningteam'] == 'Draw') {
-          Map<String, dynamic> drawingTeam1 = Map<String, dynamic>.from(
-              teams.remove(currentGame['teamsinvolved'][0]));
-          Map<String, dynamic> drawingTeam2 = Map<String, dynamic>.from(
-              teams.remove(currentGame['teamsinvolved'][1]));
-
-          drawingTeam1['gamesplayed'] = drawingTeam1['gamesplayed'] + 1;
-          List<String> oldDraws1 = List<String>.from(drawingTeam1['draws']);
-          oldDraws1.add(drawingTeam2['teamname']);
-          drawingTeam1['draws'] = oldDraws1;
-          drawingTeam1['winrate'] = (List.from(drawingTeam1['wins']).length +
-                  List.from(drawingTeam1['draws']).length * 0.5) /
-              drawingTeam1['gamesplayed'];
-
-          drawingTeam2['gamesplayed'] = drawingTeam2['gamesplayed'] + 1;
-          List<String> oldDraws2 = List<String>.from(drawingTeam2['draws']);
-          oldDraws2.add(drawingTeam1['teamname']);
-          drawingTeam2['draws'] = oldDraws2;
-          drawingTeam2['winrate'] = (List.from(drawingTeam2['wins']).length +
-                  List.from(drawingTeam2['draws']).length * 0.5) /
-              drawingTeam2['gamesplayed'];
-
-          teams[drawingTeam1['teamname']] = drawingTeam1;
-          teams[drawingTeam2['teamname']] = drawingTeam2;
+        if (currentGame.winningTeam == 'Draw') {
+          Team drawingTeam1 =
+              Team.fromJSON(teams.remove(currentGame.teamsInvolved[0]));
+          Team drawingTeam2 =
+              Team.fromJSON(teams.remove(currentGame.teamsInvolved[1]));
+          drawingTeam1.addDraw(gameID);
+          drawingTeam2.addDraw(gameID);
+          teams[drawingTeam1.teamName] = drawingTeam1.toJSON();
+          teams[drawingTeam2.teamName] = drawingTeam2.toJSON();
         } else {
-          Map<String, dynamic> winningTeam = Map<String, dynamic>.from(
-              teams.remove(currentGame['winningteam']));
-          Map<String, dynamic> losingTeam = Map<String, dynamic>.from(
-              teams.remove(currentGame['losingteam']));
-
-          winningTeam['gamesplayed'] = winningTeam['gamesplayed'] + 1;
-          List<String> oldWins = List<String>.from(winningTeam['wins']);
-          oldWins.add(losingTeam['teamname']);
-          winningTeam['wins'] = oldWins;
-          winningTeam['winrate'] = (List.from(winningTeam['wins']).length +
-                  List.from(winningTeam['draws']).length * 0.5) /
-              winningTeam['gamesplayed'];
-
-          losingTeam['gamesplayed'] = losingTeam['gamesplayed'] + 1;
-          List<String> oldLosses = List<String>.from(losingTeam['losses']);
-          oldLosses.add(winningTeam['teamname']);
-          losingTeam['losses'] = oldLosses;
-          losingTeam['winrate'] = (List.from(losingTeam['wins']).length +
-                  List.from(losingTeam['draws']).length * 0.5) /
-              losingTeam['gamesplayed'];
-
-          teams[winningTeam['teamname']] = winningTeam;
-          teams[losingTeam['teamname']] = losingTeam;
+          Team winningTeam =
+              Team.fromJSON(teams.remove(currentGame.winningTeam));
+          Team losingTeam = Team.fromJSON(teams.remove(currentGame.losingTeam));
+          winningTeam.addWin(gameID);
+          losingTeam.addLoss(gameID);
+          teams[winningTeam.teamName] = winningTeam.toJSON();
+          teams[losingTeam.teamName] = losingTeam.toJSON();
         }
-
         await tx
             .update(postRef, <String, Map<String, dynamic>>{'teams': teams});
       }
-    }).catchError((err) => print(err));
+    });
   }
 
   Future<void> finishTournament(String tourID) async {

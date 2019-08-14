@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:tourney/models/game.dart';
 import 'package:tourney/resources/repository.dart';
 import 'package:tourney/assets/colors.dart';
@@ -7,6 +8,50 @@ import 'package:tourney/screens/ongoingGamePage/finishGameComponent.dart';
 import 'package:tourney/screens/ongoingGamePage/pointsRow.dart';
 import 'package:tourney/screens/ongoingGamePage/teamsRow.dart';
 import 'package:tourney/screens/ongoingGamePage/versusComponent.dart';
+
+class OnlyOnePointerRecognizer extends OneSequenceGestureRecognizer {
+  int _p = 0;
+  @override
+  void addPointer(PointerDownEvent event) {
+    startTrackingPointer(event.pointer);
+    if (_p == 0) {
+      resolve(GestureDisposition.rejected);
+      _p = event.pointer;
+    } else {
+      resolve(GestureDisposition.accepted);
+    }
+  }
+
+  @override
+  String get debugDescription => 'only one pointer recognizer';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {}
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (!event.down && event.pointer == _p) {
+      _p = 0;
+    }
+  }
+}
+
+class OnlyOnePointerRecognizerWidget extends StatelessWidget {
+  final Widget child;
+  OnlyOnePointerRecognizerWidget({this.child});
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      gestures: <Type, GestureRecognizerFactory>{
+        OnlyOnePointerRecognizer: GestureRecognizerFactoryWithHandlers<OnlyOnePointerRecognizer>(
+          () => OnlyOnePointerRecognizer(),
+          (OnlyOnePointerRecognizer instance) {},
+        ),
+      },
+      child: child,
+    );
+  }
+}
 
 class OngoingGamePage extends StatefulWidget {
   final String _tourID;
@@ -92,7 +137,9 @@ class _OngoingGamePageState extends State<OngoingGamePage> {
                 child: Text('Cancel'),
               ),
               FlatButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () { 
+                  _repository.deleteOngoingGame(widget._tourID, widget._game.gameID);
+                  Navigator.of(context).pop(true); },
                 child: Text('Confirm'),
               ),
             ],
@@ -123,7 +170,7 @@ class _OngoingGamePageState extends State<OngoingGamePage> {
                 ),
               )),
           backgroundColor: tourneyMilkWhite,
-          body: Column(
+          body: OnlyOnePointerRecognizerWidget(child:Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -143,9 +190,16 @@ class _OngoingGamePageState extends State<OngoingGamePage> {
                               // Score Row
                               PointsRow(_firstTeamPoints, _secondTeamPoints),
                               // Buttons Rows
-                              ButtonsRow(_isLoading, _updatePoints, 1),
-                              ButtonsRow(_isLoading, _updatePoints, 2),
-                              ButtonsRow(_isLoading, _updatePoints, 3),
+                              Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  ButtonsRow(_isLoading, _updatePoints, 1),
+                                  ButtonsRow(_isLoading, _updatePoints, 2),
+                                  ButtonsRow(_isLoading, _updatePoints, 3),
+                                ],
+                              ))
                             ]),
                         // Versus Component
                         VersusComponent(widget._game.timeStarted),
@@ -153,6 +207,6 @@ class _OngoingGamePageState extends State<OngoingGamePage> {
               FinishGameComponent(_isLoading, _finishGame),
             ],
           ),
-        )));
+        ))));
   }
 }

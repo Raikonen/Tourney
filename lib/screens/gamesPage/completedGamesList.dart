@@ -19,13 +19,14 @@ class CompletedGamesList extends StatelessWidget {
             children: <Widget>[Icon(Icons.clear), Text("Currently Empty")],
           ))
         // Games List
-        : ListView.builder(
+        : Scrollbar(
+            child: ListView.builder(
             physics: BouncingScrollPhysics(),
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             itemCount: _games.length,
             itemBuilder: (BuildContext context, int index) {
               return GameTile(_games[_gameIDs[index]], index);
-            });
+            }));
   }
 }

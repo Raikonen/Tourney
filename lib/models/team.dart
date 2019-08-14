@@ -1,9 +1,9 @@
 class Team {
   final String _teamName;
   int _gamesPlayed;
-  List<dynamic> _wins;
-  List<dynamic> _draws;
-  List<dynamic> _losses;
+  List<String> _wins;
+  List<String> _draws;
+  List<String> _losses;
   double _winrate;
 
   Team(this._teamName) {
@@ -17,10 +17,45 @@ class Team {
   // Getters
   String get teamName => _teamName;
   int get gamesPlayed => _gamesPlayed;
-  List<dynamic> get wins => _wins;
-  List<dynamic> get draws => _draws;
-  List<dynamic> get losses => _losses;
+  List<String> get wins => _wins;
+  List<String> get draws => _draws;
+  List<String> get losses => _losses;
   double get winrate => _winrate;
+
+  void updateWinrate() {
+    _winrate = (_wins.length + _draws.length * 0.5) / _gamesPlayed;
+  }
+  void addDraw(String gameID) {
+    _gamesPlayed++;
+    _draws.add(gameID);
+    updateWinrate();
+  }
+  void addLoss(String gameID) {
+    _gamesPlayed++;
+    _losses.add(gameID);
+    updateWinrate();
+  }
+  void addWin(String gameID) {
+    _gamesPlayed++;
+    _wins.add(gameID);
+    updateWinrate();
+  }
+  void removeDraw(String gameID) {
+    _gamesPlayed--;
+    _draws.remove(gameID);
+    updateWinrate();
+  }
+  void removeWin(String gameID) {
+    _gamesPlayed--;
+    _losses.remove(gameID);
+    updateWinrate();
+  }
+  void removeLoss(String gameID) {
+    _gamesPlayed--;
+    _wins.remove(gameID);
+    updateWinrate();
+  }
+  
 
   //toJSON for firestore
   Map<String, dynamic> toJSON() => {
@@ -36,9 +71,9 @@ class Team {
   Team.fromJSON(Map<dynamic, dynamic> data)
       : _teamName = data['teamname'],
         _gamesPlayed = data['gamesplayed'],
-        _wins = data['wins'],
-        _draws = data['draws'],
-        _losses = data['losses'],
+        _wins = List<String>.from(data['wins']),
+        _draws = List<String>.from(data['draws']),
+        _losses = List<String>.from(data['losses']),
         _winrate = data['winrate'].toDouble();
 
   @override

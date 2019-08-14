@@ -46,7 +46,7 @@ class _LandingFormState extends State<LandingForm> {
 
   // Validate TourID and set _isValidated bool accordingly
   Future<void> validateTourID(String tourID) async {
-    dynamic response = await (_repository.checkTournament(tourID));
+    bool response = await (_repository.checkTournament(tourID));
     this.setState(() {
       _isValidated = response;
     });

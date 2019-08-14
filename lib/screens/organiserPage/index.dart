@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tourney/screens/organiserPage/gameManager/index.dart';
 import 'package:tourney/screens/organiserPage/optionButton.dart';
-import 'package:tourney/screens/organiserPage/teamSelect.dart';
+import 'package:tourney/screens/organiserPage/gameCreate/index.dart';
 
 class OrganiserPage extends StatelessWidget {
   final String _tourID;
@@ -45,7 +46,7 @@ class OrganiserPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        TeamSelect(this._tourID, this._teamNames)));
+                        GameCreate(this._tourID, this._teamNames)));
           }),
           SizedBox(
             height: 30.0,
@@ -53,11 +54,16 @@ class OrganiserPage extends StatelessWidget {
           // Delete Game Option
           OptionButton(
               false,
-              "Delete Game",
+              "Manage Games",
               Icon(
                 Icons.remove,
                 color: Colors.white,
               ), () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        GameManager(this._tourID)));
           }),
           SizedBox(
             height: 30.0,

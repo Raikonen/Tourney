@@ -18,13 +18,15 @@ class OngoingGamesList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[Icon(Icons.clear), Text("Currently Empty")],
           ))
-        : ListView.builder(
-            physics: BouncingScrollPhysics(),
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemCount: _gameIDs.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GameTileTopHalf(_games[_gameIDs[index]], index, true);
-            });
+        : Scrollbar(
+            child: ListView.builder(
+                physics: BouncingScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: _gameIDs.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GameTileTopHalf(
+                      _games[_gameIDs[index]], index, true, null);
+                }));
   }
 }
