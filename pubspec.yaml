@@ -32,6 +32,7 @@ dependencies:
   intl: ^0.15.8
   auto_size_text: ^2.0.2
   connectivity: ^0.4.3+6
+  flushbar: ^1.8.2
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +78,10 @@ flutter:
     - family: DMSans
       fonts:
         - asset: fonts/DMSans-Regular.ttf
+          style: normal
+    - family: OpenSans
+      fonts:
+        - asset: fonts/OpenSans-Regular.ttf
           style: normal
     - family: Ubuntu
       fonts:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 
 import 'package:tourney/resources/repository.dart';
@@ -62,72 +63,98 @@ class _TourCreateState extends State<TourCreate> {
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
                   return SimpleDialog(
-                      title: Text(
-                        'My Codes',
-                        textAlign: TextAlign.center,
+                    title: Text(
+                      'My Codes',
+                      textAlign: TextAlign.center,
+                    ),
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                              child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: 'Tournament Code: ',
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans', fontSize: 20.0)),
+                                TextSpan(
+                                    text: '${snapshot.data.tourID} ',
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold))
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          )),
+                          Padding(
+                              padding: EdgeInsets.only(right: 10.0),
+                              child: InkWell(
+                                child: Icon(Icons.content_copy),
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text: "${snapshot.data.tourID}"));
+                                },
+                              )),
+                        ],
                       ),
-                      children: <Widget>[
-                        Align(
-                            alignment: Alignment.center,
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                      text: 'Tournament Code: ',
-                                      style: TextStyle(
-                                          fontFamily: 'DMSans',
-                                          fontSize: 20.0)),
-                                  TextSpan(
-                                      text: '${snapshot.data.tourID}',
-                                      style: TextStyle(
-                                          fontFamily: 'DMSans',
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold))
-                                ],
-                              ),
-                            )),
-                        Align(
-                            alignment: Alignment.center,
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                      text: 'Organiser Code: ',
-                                      style: TextStyle(
-                                          fontFamily: 'DMSans',
-                                          fontSize: 20.0)),
-                                  TextSpan(
-                                      text: '${snapshot.data.orgCode}',
-                                      style: TextStyle(
-                                          fontFamily: 'DMSans',
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold))
-                                ],
-                              ),
-                            )),
-                        SizedBox(height: 20.0),
-                        Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                                color: Color(0xFF33B17C),
-                                padding: EdgeInsets.all(10.0),
-                                child: InkWell(
-                                    child: Text('I have noted the codes down',
-                                        style: TextStyle(
-                                            fontFamily: 'Ubuntu',
-                                            fontSize: 15.0,
-                                            color: Colors.white)),
-                                    onTap: () {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) =>
-                                                  MyInheritedWidget(
-                                                      child: MyPageController(
-                                                          snapshot
-                                                              .data.tourID))),
-                                          ModalRoute.withName('/'));
-                                    })))
-                      ]);
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                              child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: 'Organiser Code: ',
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans', fontSize: 20.0)),
+                                TextSpan(
+                                    text: '${snapshot.data.orgCode} ',
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold))
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          )),
+                          Padding(
+                              padding: EdgeInsets.only(right: 10.0),
+                              child: InkWell(
+                                child: Icon(Icons.content_copy),
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text: "${snapshot.data.orgCode}"));
+                                },
+                              )),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      Container(
+                          margin: EdgeInsets.symmetric(horizontal: 20.0),
+                          alignment: Alignment.bottomCenter,
+                          color: Color(0xFF33B17C),
+                          padding: EdgeInsets.all(10.0),
+                          child: InkWell(
+                              child: Text('I have noted the codes down',
+                                  style: TextStyle(
+                                      fontFamily: 'Ubuntu',
+                                      fontSize: 16.0,
+                                      color: Colors.white)),
+                              onTap: () {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            MyInheritedWidget(
+                                                child: MyPageController(
+                                                    snapshot.data.tourID))),
+                                    ModalRoute.withName('/'));
+                              }))
+                    ],
+                  );
                 } else {
                   return SizedBox(
                       width: 300.0,
@@ -238,7 +265,7 @@ class _TourCreateState extends State<TourCreate> {
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'DMSans')),
-                    )
+                    ),
                   ],
                 ),
                 SizedBox(

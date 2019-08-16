@@ -29,7 +29,7 @@ class GameTileTopHalf extends StatelessWidget {
             height: _isOngoing ? 75.0 : 85.0,
             decoration: BoxDecoration(
                 color: _isOngoing
-                    ? _index % 2 == 0 ? Color(0xFF69737F) : Color(0x666666)
+                    ? _index % 2 == 0 ? Color(0xFFAFBAD7) : Color(0xFFD5DDF3)
                     : _index % 2 == 0 ? Color(0xFFDCD9CD) : Color(0xFFF1F0EA),
                 borderRadius: BorderRadius.circular(10.0)),
             child: Stack(

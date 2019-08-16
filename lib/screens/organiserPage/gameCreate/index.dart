@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flushbar/flushbar.dart';
+
 import 'package:tourney/models/game.dart';
 import 'package:tourney/resources/repository.dart';
 import 'package:tourney/screens/ongoingGamePage/index.dart';
@@ -67,70 +69,80 @@ class _GameCreateState extends State<GameCreate> {
             padding: EdgeInsets.symmetric(vertical: 10.0),
             child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.green,
+                    color: (_selectedIndex.length > 1)
+                        ? Colors.green
+                        : Colors.grey,
                     borderRadius: BorderRadius.circular(10.0)),
-                child: (_selectedIndex.length > 1)
-                    ? Container(
-                        height: 40.0,
-                        child: Builder(
-                            builder: (myContext) => FlatButton(
-                                  child: _createButtonChild(),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () async {
-                                          this.setState(() {
-                                            _isLoading = true;
-                                          });
-                                          Game newGame =
-                                              await _repository.createGame(
-                                                  widget._tourID,
-                                                  widget._teamnames[
-                                                      _selectedIndex[0]],
-                                                  widget._teamnames[
-                                                      _selectedIndex[1]]);
-                                          if (newGame == null) {
-                                            Scaffold.of(myContext).showSnackBar(
-                                                SnackBar(
-                                                    behavior: SnackBarBehavior
-                                                        .floating,
-                                                    backgroundColor:
-                                                        Colors.redAccent,
-                                                    content: Row(
-                                                      children: <Widget>[
-                                                        Icon(Icons.error),
-                                                        Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    left: 10.0),
-                                                            child: Text(
-                                                                'Game is already in progress!'))
-                                                      ],
-                                                    )));
-                                          } else {
-                                            Navigator.pop(context);
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      (OngoingGamePage(
-                                                          widget._tourID,
-                                                          newGame)),
-                                                ));
-                                          }
-                                        },
-                                )))
-                    : null),
-          ),
+                child: Container(
+                    height: 40.0,
+                    child: Builder(
+                        builder: (myContext) => FlatButton(
+                              child: _createButtonChild(),
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      this.setState(() {
+                                        _isLoading = true;
+                                      });
+                                      Game newGame =
+                                          await _repository.createGame(
+                                              widget._tourID,
+                                              widget._teamnames[
+                                                  _selectedIndex[0]],
+                                              widget._teamnames[
+                                                  _selectedIndex[1]]);
+                                      if (newGame == null) {
+                                        Flushbar(
+                                          icon: Icon(
+                                            Icons.info_outline,
+                                            size: 28.0,
+                                            color: Colors.red[300],
+                                          ),
+                                          duration: Duration(seconds: 3),
+                                          leftBarIndicatorColor:
+                                              Colors.red[300],
+                                          messageText: Text(
+                                            "Selected teams are currently ingame!",
+                                            style: TextStyle(
+                                                fontSize: 16.0,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w300),
+                                          ),
+                                        )..show(context);
+                                        this.setState(() {
+                                          _isLoading = false;
+                                        });
+                                      } else {
+                                        Navigator.pop(context);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  (OngoingGamePage(
+                                                      widget._tourID, newGame)),
+                                            ));
+                                      }
+                                    },
+                            )))),
+          )
         ],
       ),
     ));
   }
 
   Widget _createButtonChild() {
-    return Text("GO",
-        style: TextStyle(
-          fontFamily: 'FjallaOne',
-          fontSize: 20.0,
-        ));
+    return _isLoading
+        ? SizedBox(
+            height: 20.0,
+            width: 20.0,
+            child: CircularProgressIndicator(
+              strokeWidth: 3.0,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ))
+        : Text("GO",
+            style: TextStyle(
+                fontFamily: 'DMSans',
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold));
   }
 }

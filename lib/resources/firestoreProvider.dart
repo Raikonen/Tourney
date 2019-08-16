@@ -42,18 +42,19 @@ class FirestoreProvider {
         _firestore.collection("tournaments").document(tourID);
     bool isValid = true;
 
-    _firestore.runTransaction((Transaction tx) async {
+    await _firestore.runTransaction((Transaction tx) async {
       DocumentSnapshot postSnapshot = await tx.get(postRef);
       if (postSnapshot.exists) {
         Map<String, dynamic> games =
             Map<String, dynamic>.from(postSnapshot.data['games']);
-        Map<String, dynamic>.from(games['ongoing'])
-          .forEach((key, val) {
-            if(setEquals<String>(Set<String>.from(val['teamsinvolved']),newGame.teamsInvolved.toSet()))
-              isValid = false;
-          });
-        if(isValid)
-          games['ongoing'][newGame.gameID] = newGame.toJSON();
+        Map<String, dynamic>.from(games['ongoing']).forEach((key, val) {
+          if (Set<String>.from(val['teamsinvolved'])
+              .intersection(newGame.teamsInvolved.toSet())
+              .isNotEmpty) {
+            isValid = false;
+          }
+        });
+        if (isValid) games['ongoing'][newGame.gameID] = newGame.toJSON();
         await tx.update(postRef, <String, dynamic>{'games': games});
       }
     });

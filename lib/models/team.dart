@@ -23,44 +23,49 @@ class Team {
   double get winrate => _winrate;
 
   void updateWinrate() {
-    _winrate = (_wins.length + _draws.length * 0.5) / _gamesPlayed;
+    _winrate = _gamesPlayed == 0 ? 0 : (_wins.length + _draws.length * 0.5) / _gamesPlayed;
   }
-  void addDraw(String gameID) {
-    _gamesPlayed++;
-    _draws.add(gameID);
-    updateWinrate();
-  }
-  void addLoss(String gameID) {
-    _gamesPlayed++;
-    _losses.add(gameID);
-    updateWinrate();
-  }
+
   void addWin(String gameID) {
     _gamesPlayed++;
     _wins.add(gameID);
     updateWinrate();
   }
+
+  void addLoss(String gameID) {
+    _gamesPlayed++;
+    _losses.add(gameID);
+    updateWinrate();
+  }
+
+  void addDraw(String gameID) {
+    _gamesPlayed++;
+    _draws.add(gameID);
+    updateWinrate();
+  }
+
+  void removeWin(String gameID) {
+    _gamesPlayed--;
+    _wins.remove(gameID);
+    updateWinrate();
+  }
+
+  void removeLoss(String gameID) {
+    _gamesPlayed--;
+    _losses.remove(gameID);
+    updateWinrate();
+  }
+
   void removeDraw(String gameID) {
     _gamesPlayed--;
     _draws.remove(gameID);
     updateWinrate();
   }
-  void removeWin(String gameID) {
-    _gamesPlayed--;
-    _losses.remove(gameID);
-    updateWinrate();
-  }
-  void removeLoss(String gameID) {
-    _gamesPlayed--;
-    _wins.remove(gameID);
-    updateWinrate();
-  }
-  
 
   //toJSON for firestore
   Map<String, dynamic> toJSON() => {
         'teamname': _teamName,
-        'gamesplayed' : _gamesPlayed,
+        'gamesplayed': _gamesPlayed,
         'wins': _wins,
         'draws': _draws,
         'losses': _losses,

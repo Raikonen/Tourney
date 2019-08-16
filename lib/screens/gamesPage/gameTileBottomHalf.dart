@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tourney/models/inheritedWidget.dart';
 
+import 'package:tourney/models/inheritedWidget.dart';
 import 'package:tourney/screens/gamesPage/pastGamesIndicator.dart';
 import 'package:tourney/resources/repository.dart';
 import 'package:tourney/screens/gamesPage/pointsTree.dart';

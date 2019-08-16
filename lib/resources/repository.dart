@@ -28,6 +28,8 @@ class Repository {
   
   Future<void> deleteOngoingGame(String tourID, String gameID) => _firestoreProvider.deleteOngoingGame(tourID, gameID);
 
+  Future<void> deleteCompletedGame(String tourID, String gameID) => _firestoreProvider.deleteCompletedGame(tourID, gameID);
+
   Future<void> finishGame(String tourID, String gameID) => _firestoreProvider.finishGame(tourID, gameID);
   
   Future<void> finishTournament(String tourID) => _firestoreProvider.finishTournament(tourID);
