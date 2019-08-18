@@ -26,7 +26,9 @@ class Tournament {
     }
     this._orgCode = orgCodeStr;
     this._status = "ongoing";
-    this._teams = Map.fromIterable(_teamNames, key: (team) => team.toString(), value: (team) => Team(team.toString()).toJSON());
+    this._teams = Map.fromIterable(_teamNames,
+        key: (team) => team.toString(),
+        value: (team) => Team(team.toString()).toJSON());
     var initialiseGames = new Map<String, dynamic>();
     initialiseGames['ongoing'] = new Map<String, dynamic>();
     initialiseGames['completed'] = new Map<String, dynamic>();

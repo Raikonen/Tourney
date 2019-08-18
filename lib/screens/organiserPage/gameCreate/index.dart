@@ -50,11 +50,10 @@ class _GameCreateState extends State<GameCreate> {
             itemBuilder: (context, index) => ListTile(
               onTap: () {
                 this.setState(() {
-                  _selectedIndex.contains(index)
-                      ? _selectedIndex.remove(index)
-                      : _selectedIndex.length > 1
-                          ? null
-                          : _selectedIndex.add(index);
+                  if(_selectedIndex.contains(index))
+                    _selectedIndex.remove(index);
+                  else if(_selectedIndex.length < 2)
+                    _selectedIndex.add(index);
                 });
               },
               title: Text(widget._teamnames[index]),

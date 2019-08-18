@@ -23,7 +23,9 @@ class Team {
   double get winrate => _winrate;
 
   void updateWinrate() {
-    _winrate = _gamesPlayed == 0 ? 0 : (_wins.length + _draws.length * 0.5) / _gamesPlayed;
+    _winrate = _gamesPlayed == 0
+        ? 0
+        : (_wins.length + _draws.length * 0.5) / _gamesPlayed;
   }
 
   void addWin(String gameID) {

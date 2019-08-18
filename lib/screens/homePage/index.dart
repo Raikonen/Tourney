@@ -75,6 +75,8 @@ class Home extends StatelessWidget {
                     height: 10.0,
                   ),
                   OrganiserButton(data),
+                  Text("Check Out Other Tournaments"),
+                  Text("FAQ"),
                 ],
               ),
             ));
