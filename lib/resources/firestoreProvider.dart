@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:tourney/models/tournament.dart';
 import 'package:tourney/models/game.dart';
 import 'package:tourney/models/team.dart';

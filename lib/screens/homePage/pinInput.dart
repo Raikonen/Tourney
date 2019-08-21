@@ -1,13 +1,13 @@
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 import 'package:tourney/models/tournament.dart';
 import 'package:tourney/screens/organiserPage/index.dart';
+import 'package:flushbar/flushbar.dart';
 
 class PinInput extends StatefulWidget {
-  final Tournament _data;
-  final Function _errorCallback;
-  PinInput(this._data, this._errorCallback);
+  final Tournament _tourData;
+  PinInput(this._tourData);
+
   @override
   State<StatefulWidget> createState() {
     return _PinInputState();
@@ -16,12 +16,21 @@ class PinInput extends StatefulWidget {
 
 class _PinInputState extends State<PinInput> {
   final TextEditingController _textEditingController = TextEditingController();
+  bool _isInvalid = false;
 
   @override
   void initState() {
     _textEditingController.addListener(() {
-      if (_textEditingController.text.length == 4)
+      if (_textEditingController.text.length == 4) {
         this.onPinSubmit(context, _textEditingController.text);
+        this.setState(() {
+          _isInvalid = true;
+        });
+      } else {
+        this.setState(() {
+          _isInvalid = false;
+        });
+      }
     });
 
     super.initState();
@@ -35,16 +44,25 @@ class _PinInputState extends State<PinInput> {
 
   // Pin Submission
   void onPinSubmit(BuildContext context, String enteredOrgCode) {
-    if (widget._data.orgCode == enteredOrgCode) {
-      Navigator.pop(context);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  OrganiserPage(widget._data.tourID, widget._data.teamNames)));
+    if (widget._tourData.orgCode == enteredOrgCode) {
+      Navigator.of(context, rootNavigator: true).pop(true);
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrganiserPage(widget._tourData)));
     } else {
-      Navigator.pop(context);
-      widget._errorCallback();
+      Flushbar(
+        icon: Icon(
+          Icons.info_outline,
+          size: 28.0,
+          color: Colors.red[300],
+        ),
+        animationDuration: Duration(seconds: 0),
+        duration: Duration(seconds: 3),
+        leftBarIndicatorColor: Colors.red[300],
+        messageText: Text(
+          "Invalid Organiser Code",
+          style: TextStyle(
+              fontSize: 16.0, color: Colors.white, fontWeight: FontWeight.w300),
+        ),
+      )..show(context);
     }
   }
 
@@ -63,7 +81,7 @@ class _PinInputState extends State<PinInput> {
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.phone,
                 decoration: UnderlineDecoration(
-                    enteredColor: Colors.orange,
+                    enteredColor: _isInvalid ? Colors.red : Colors.green,
                     textStyle: TextStyle(
                       color: Colors.black,
                       fontSize: 24,

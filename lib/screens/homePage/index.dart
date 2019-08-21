@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:tourney/models/tournament.dart';
 import 'package:tourney/models/inheritedWidget.dart';
-import 'package:tourney/screens/homePage/organiserButton.dart';
+
+import 'package:tourney/screens/homePage/pinInput.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MyInheritedWidgetState state = MyInheritedWidget.of(context);
 
+    Future<bool> showPinInput(Tournament tourData, BuildContext context) async {
+      return await showDialog<bool>(
+          barrierDismissible: true,
+          context: context,
+          builder: (mycontext) => PinInput(tourData));
+    }
+
     return StreamBuilder(
         stream: state.currentTournamnent,
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasData) {
-            Tournament data = Tournament.fromSnapshot(snapshot.data);
+            Tournament tourData = Tournament.fromSnapshot(snapshot.data);
             return Scaffold(
                 body: Center(
               child: Column(
@@ -22,7 +31,7 @@ class Home extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    data.tourName,
+                    tourData.tourName,
                     style: TextStyle(fontSize: 50.0, fontFamily: "FjallaOne"),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.2),
@@ -36,7 +45,7 @@ class Home extends StatelessWidget {
                       children: <TextSpan>[
                         TextSpan(text: 'Teams: '),
                         TextSpan(
-                            text: '${data.teamNames.length}',
+                            text: '${tourData.teamNames.length}',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -51,7 +60,7 @@ class Home extends StatelessWidget {
                       children: <TextSpan>[
                         TextSpan(text: 'Games Ongoing: '),
                         TextSpan(
-                            text: '${data.games['ongoing'].length}',
+                            text: '${tourData.games['ongoing'].length}',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -66,7 +75,7 @@ class Home extends StatelessWidget {
                       children: <TextSpan>[
                         TextSpan(text: 'Games Completed: '),
                         TextSpan(
-                            text: '${data.games['completed'].length}',
+                            text: '${tourData.games['completed'].length}',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -74,9 +83,22 @@ class Home extends StatelessWidget {
                   SizedBox(
                     height: 10.0,
                   ),
-                  OrganiserButton(data),
-                  Text("Check Out Other Tournaments"),
-                  Text("FAQ"),
+                  FlatButton.icon(
+                      icon: Icon(
+                        FontAwesomeIcons.userCircle,
+                        color: Colors.pink,
+                      ),
+                      shape: ContinuousRectangleBorder(
+                          side: BorderSide(color: Colors.pink, width: 2.0)),
+                      label: Text("For Organisers",
+                          style: TextStyle(
+                              color: Colors.pink,
+                              fontFamily: 'OpenSans',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0)),
+                      onPressed: () async {
+                        await showPinInput(tourData, context);
+                      }),
                 ],
               ),
             ));

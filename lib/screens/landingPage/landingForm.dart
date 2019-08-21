@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:tourney/resources/repository.dart';
 import 'package:tourney/models/inheritedWidget.dart';
 import 'package:tourney/screens/pageController/index.dart';
-import 'package:tourney/screens/tourCreatePage/index.dart';
 
 class LandingForm extends StatefulWidget {
   @override
@@ -82,7 +81,7 @@ class _LandingFormState extends State<LandingForm> {
           children: <Widget>[
             // Input Box
             Container(
-                padding: EdgeInsets.only(top: 80.0),
+                padding: EdgeInsets.only(top: 80.0, bottom: 20.0),
                 width: 250.0,
                 child: TextFormField(
                   textAlign: TextAlign.center,
@@ -121,7 +120,7 @@ class _LandingFormState extends State<LandingForm> {
 
             // Enter Button
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.0),
+              padding: EdgeInsets.symmetric(vertical: 10.0),
               child: SizedBox(
                   width: 250.0,
                   child: OutlineButton(
@@ -131,28 +130,6 @@ class _LandingFormState extends State<LandingForm> {
                     child: _createButtonChild(),
                   )),
             ),
-
-            // New Tournament Button
-            SizedBox(
-                width: 250.0,
-                child: OutlineButton(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    borderSide: BorderSide(width: 2.0, color: Colors.green),
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TourCreate(),
-                          ));
-                    },
-                    child: Text(
-                      "New Tournament",
-                      style: TextStyle(
-                          color: Colors.green,
-                          fontFamily: 'Ubuntu',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0),
-                    )))
           ],
         ),
       ),

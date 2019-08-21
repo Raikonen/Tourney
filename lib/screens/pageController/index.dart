@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:tourney/models/inheritedWidget.dart';
+import 'package:tourney/models/tournament.dart';
+import 'package:tourney/screens/organiserPage/gameCreate/index.dart';
+import 'package:tourney/screens/organiserPage/gameManager/index.dart';
+import 'package:tourney/screens/organiserPage/index.dart';
 
 import 'package:tourney/screens/pageController/navBar.dart';
 import 'package:tourney/screens/homePage/index.dart';
@@ -25,7 +29,7 @@ class _MyPageController extends State<MyPageController> {
 
   _MyPageController(this.tourID);
 
-  void _onTabTapped(int index) {
+  void _onPageChange(int index) {
     setState(() {
       _currentPage = index;
     });
@@ -49,8 +53,8 @@ class _MyPageController extends State<MyPageController> {
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             floatingActionButton:
-                showFab ? HomeFAB(_currentPage, _onTabTapped) : null,
+                showFab ? HomeFAB(_currentPage, _onPageChange) : null,
             body: _children[_currentPage],
-            bottomNavigationBar: NavBar(_currentPage, _onTabTapped)));
+            bottomNavigationBar: NavBar(_currentPage, _onPageChange)));
   }
 }
