@@ -25,16 +25,19 @@ class Home extends StatelessWidget {
           if (snapshot.hasData) {
             Tournament tourData = Tournament.fromSnapshot(snapshot.data);
             return Scaffold(
-                body: Center(
+                body: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(bottom: 50.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text(
+                  Expanded(
+                      child: Center(
+                          child: Text(
                     tourData.tourName,
                     style: TextStyle(fontSize: 50.0, fontFamily: "FjallaOne"),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                  ))),
                   RichText(
                     text: TextSpan(
                       style: TextStyle(
@@ -81,23 +84,39 @@ class Home extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    height: 10.0,
+                    height: 30.0,
                   ),
                   FlatButton.icon(
                       icon: Icon(
                         FontAwesomeIcons.userCircle,
-                        color: Colors.pink,
+                        color: Colors.black,
                       ),
                       shape: ContinuousRectangleBorder(
-                          side: BorderSide(color: Colors.pink, width: 2.0)),
+                          side: BorderSide(color: Colors.black, width: 2.0)),
                       label: Text("For Organisers",
                           style: TextStyle(
-                              color: Colors.pink,
+                              color: Colors.black,
                               fontFamily: 'OpenSans',
                               fontWeight: FontWeight.bold,
                               fontSize: 18.0)),
                       onPressed: () async {
                         await showPinInput(tourData, context);
+                      }),
+                  FlatButton.icon(
+                      icon: Icon(
+                        FontAwesomeIcons.signOutAlt,
+                        color: Colors.black,
+                      ),
+                      shape: ContinuousRectangleBorder(
+                          side: BorderSide(color: Colors.black, width: 2.0)),
+                      label: Text("Quit Tournament",
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'OpenSans',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
                       }),
                 ],
               ),
