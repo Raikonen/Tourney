@@ -40,7 +40,7 @@ class _GameCreateState extends State<GameCreate> {
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0),
             ),
-            automaticallyImplyLeading: false,
+            leading: BackButton(color: Colors.black,),
           )),
       body: Column(
         children: <Widget>[

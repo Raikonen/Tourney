@@ -16,17 +16,34 @@ class PinInput extends StatefulWidget {
 
 class _PinInputState extends State<PinInput> {
   final TextEditingController _textEditingController = TextEditingController();
+  final Flushbar _errorFlushbar = Flushbar(
+    icon: Icon(
+      Icons.info_outline,
+      size: 28.0,
+      color: Colors.red[300],
+    ),
+    animationDuration: Duration(seconds: 0),
+    duration: Duration(seconds: 3),
+    leftBarIndicatorColor: Colors.red[300],
+    messageText: Text(
+      "Invalid Organiser Pin",
+      style: TextStyle(
+          fontSize: 16.0, color: Colors.white, fontWeight: FontWeight.w300),
+    ),
+  );
   bool _isInvalid = false;
 
   @override
   void initState() {
-    _textEditingController.addListener(() {
+    _textEditingController.addListener(() async {
       if (_textEditingController.text.length == 4) {
-        this.onPinSubmit(context, _textEditingController.text);
-        this.setState(() {
-          _isInvalid = true;
-        });
+        bool res = this.onPinSubmit(context, _textEditingController.text);
+        if (!res)
+          this.setState(() {
+            _isInvalid = true;
+          });
       } else {
+        _errorFlushbar.dismiss();
         this.setState(() {
           _isInvalid = false;
         });
@@ -43,33 +60,22 @@ class _PinInputState extends State<PinInput> {
   }
 
   // Pin Submission
-  void onPinSubmit(BuildContext context, String enteredOrgCode) {
+  bool onPinSubmit(BuildContext context, String enteredOrgCode) {
     if (widget._tourData.orgCode == enteredOrgCode) {
-      Navigator.of(context, rootNavigator: true).pop(true);
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrganiserPage(widget._tourData)));
+      Navigator.of(context).pop(true);
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => OrganiserPage(widget._tourData)));
+      return true;
     } else {
-      Flushbar(
-        icon: Icon(
-          Icons.info_outline,
-          size: 28.0,
-          color: Colors.red[300],
-        ),
-        animationDuration: Duration(seconds: 0),
-        duration: Duration(seconds: 3),
-        leftBarIndicatorColor: Colors.red[300],
-        messageText: Text(
-          "Invalid Organiser Code",
-          style: TextStyle(
-              fontSize: 16.0, color: Colors.white, fontWeight: FontWeight.w300),
-        ),
-      )..show(context);
+      _errorFlushbar.show(context);
+      return false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
-      title: Text("Enter Organiser Code"),
+      title: Text("Enter Organiser Pin"),
       children: <Widget>[
         Padding(
             padding: EdgeInsets.all(35.0),

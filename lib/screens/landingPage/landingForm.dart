@@ -92,7 +92,7 @@ class _LandingFormState extends State<LandingForm> {
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value.isEmpty) {
-                      return "Enter a Tournament ID";
+                      return "Enter a Tourney Code";
                     } else if (this._isValidated == null) {
                       return "Connection Error";
                     } else if (!this._isValidated) {
@@ -114,7 +114,7 @@ class _LandingFormState extends State<LandingForm> {
                         borderRadius: BorderRadius.circular(5.0),
                         borderSide: BorderSide(),
                       ),
-                      hintText: 'Tournament ID'),
+                      hintText: 'Tourney Code'),
                   controller: _myController,
                 )),
 

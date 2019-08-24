@@ -75,7 +75,7 @@ class _TourCreateState extends State<TourCreate> {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                    text: 'Tournament Code: ',
+                                    text: 'Tourney Code: ',
                                     style: TextStyle(
                                         fontFamily: 'DMSans', fontSize: 20.0)),
                                 TextSpan(
@@ -106,7 +106,7 @@ class _TourCreateState extends State<TourCreate> {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                    text: 'Organiser Code: ',
+                                    text: 'Organiser Pin: ',
                                     style: TextStyle(
                                         fontFamily: 'DMSans', fontSize: 20.0)),
                                 TextSpan(
